@@ -50,7 +50,7 @@ end)
 --// Main GUI
 local MainGUI = Instance.new("ImageLabel")
 MainGUI.Parent = ScreenGui
-local guiWidth, guiHeight = 360, 280
+local guiWidth, guiHeight = 420, 420
 MainGUI.Size = UDim2.new(0, guiWidth, 0, guiHeight)
 MainGUI.Position = UDim2.new(0.5, -guiWidth/2, 0.5, -guiHeight/2)
 MainGUI.Image = "rbxassetid://15037065305"
@@ -59,7 +59,7 @@ MainGUI.Visible = false
 MainGUI.ScaleType = Enum.ScaleType.Stretch
 Instance.new("UICorner", MainGUI).CornerRadius = UDim.new(0,16)
 
--- Shadow for depth
+-- Shadow
 local Shadow = Instance.new("ImageLabel")
 Shadow.Parent = MainGUI
 Shadow.ZIndex = -1
@@ -70,7 +70,7 @@ Shadow.BackgroundTransparency = 1
 Shadow.ScaleType = Enum.ScaleType.Slice
 Shadow.SliceCenter = Rect.new(10,10,90,90)
 
--- Discord-style tag
+-- Tag
 local Tag = Instance.new("TextLabel")
 Tag.Parent = MainGUI
 Tag.Size = UDim2.new(0.4,0,0,22)
@@ -81,7 +81,6 @@ Tag.Font = Enum.Font.GothamBold
 Tag.TextScaled = true
 Tag.Text = "@miahhii"
 Tag.TextStrokeTransparency = 0.5
-Tag.TextWrapped = true
 
 -- Title Bar
 local TitleBar = Instance.new("TextLabel")
@@ -109,8 +108,8 @@ CloseButton.TextStrokeTransparency = 0.5
 -- Editor
 local Editor = Instance.new("TextBox")
 Editor.Parent = MainGUI
-Editor.Position = UDim2.new(0.05,0,0.15,0)
-Editor.Size = UDim2.new(0.9,0,0.55,0)
+Editor.Position = UDim2.new(0.05,0,0.18,0)
+Editor.Size = UDim2.new(0.9,0,0.45,0)
 Editor.BackgroundTransparency = 1
 Editor.TextColor3 = Color3.new(1,1,1)
 Editor.PlaceholderText = "Type your script here or paste a URL..."
@@ -122,13 +121,13 @@ Editor.TextStrokeTransparency = 0.5
 Editor.TextXAlignment = Enum.TextXAlignment.Left
 Editor.TextYAlignment = Enum.TextYAlignment.Top
 
--- Buttons
-local Execute = Instance.new("TextButton")
-local Clear = Instance.new("TextButton")
+-- BUTTONS -------------------------------------------------------------------
 
+-- Execute Button
+local Execute = Instance.new("TextButton")
 Execute.Parent = MainGUI
-Execute.Size = UDim2.new(0.45,0,0.18,0)
-Execute.Position = UDim2.new(0.04,0,0.75,0)
+Execute.Size = UDim2.new(0.44,0,0.12,0)
+Execute.Position = UDim2.new(0.05,0,0.65,0)
 Execute.BackgroundTransparency = 1
 Execute.Text = "Execute"
 Execute.Font = Enum.Font.GothamBold
@@ -136,15 +135,41 @@ Execute.TextScaled = true
 Execute.TextColor3 = Color3.new(1,1,1)
 Execute.TextStrokeTransparency = 0.5
 
+-- Clear Button
+local Clear = Instance.new("TextButton")
 Clear.Parent = MainGUI
-Clear.Size = UDim2.new(0.45,0,0.18,0)
-Clear.Position = UDim2.new(0.51,0,0.75,0)
+Clear.Size = UDim2.new(0.44,0,0.12,0)
+Clear.Position = UDim2.new(0.51,0,0.65,0)
 Clear.BackgroundTransparency = 1
 Clear.Text = "Clear"
 Clear.Font = Enum.Font.GothamBold
 Clear.TextScaled = true
 Clear.TextColor3 = Color3.new(1,1,1)
 Clear.TextStrokeTransparency = 0.5
+
+-- Save Script Button
+local SaveButton = Instance.new("TextButton")
+SaveButton.Parent = MainGUI
+SaveButton.Size = UDim2.new(0.9,0,0.1,0)
+SaveButton.Position = UDim2.new(0.05,0,0.80,0)
+SaveButton.BackgroundTransparency = 1
+SaveButton.Text = "Save Script"
+SaveButton.Font = Enum.Font.GothamBold
+SaveButton.TextScaled = true
+SaveButton.TextColor3 = Color3.new(1,1,1)
+SaveButton.TextStrokeTransparency = 0.5
+
+-- Extra Section Button
+local SectionButton = Instance.new("TextButton")
+SectionButton.Parent = MainGUI
+SectionButton.Size = UDim2.new(0.9,0,0.1,0)
+SectionButton.Position = UDim2.new(0.05,0,0.90,0)
+SectionButton.BackgroundTransparency = 1
+SectionButton.Text = "Open Extra Section"
+SectionButton.Font = Enum.Font.GothamBold
+SectionButton.TextScaled = true
+SectionButton.TextColor3 = Color3.new(1,1,1)
+SectionButton.TextStrokeTransparency = 0.5
 
 -- Hover animation for buttons
 local function addHoverEffect(button)
@@ -158,6 +183,8 @@ end
 addHoverEffect(Execute)
 addHoverEffect(Clear)
 addHoverEffect(CloseButton)
+addHoverEffect(SaveButton)
+addHoverEffect(SectionButton)
 
 -- Open/Close animations
 local function animateOpen()
@@ -182,7 +209,7 @@ AppIcon.MouseButton1Click:Connect(function()
 end)
 CloseButton.MouseButton1Click:Connect(animateClose)
 
--- Execute script safely
+-- Execute script
 Execute.MouseButton1Click:Connect(function()
 	local code = Editor.Text
 	if code ~= "" then
@@ -240,7 +267,6 @@ ExtraSection.Visible = false
 ExtraSection.ScaleType = Enum.ScaleType.Stretch
 Instance.new("UICorner", ExtraSection).CornerRadius = UDim.new(0,16)
 
--- Close button inside Extra Section
 local ExtraClose = Instance.new("TextButton")
 ExtraClose.Parent = ExtraSection
 ExtraClose.Size = UDim2.new(0,30,0,30)
@@ -252,27 +278,83 @@ ExtraClose.TextScaled = true
 ExtraClose.TextColor3 = Color3.new(1,1,1)
 ExtraClose.TextStrokeTransparency = 0.5
 
--- Example content in Extra Section
+local savedScripts = {}
+
 local ExtraLabel = Instance.new("TextLabel")
 ExtraLabel.Parent = ExtraSection
-ExtraLabel.Size = UDim2.new(0.9,0,0.8,0)
-ExtraLabel.Position = UDim2.new(0.05,0,0.1,0)
+ExtraLabel.Size = UDim2.new(0.9,0,0,20)
+ExtraLabel.Position = UDim2.new(0.05,0,0,0)
 ExtraLabel.BackgroundTransparency = 1
 ExtraLabel.TextColor3 = Color3.new(1,1,1)
 ExtraLabel.TextStrokeTransparency = 0.5
-ExtraLabel.Text = "This is the Extra Section!"
+ExtraLabel.Text = "Saved Scripts (Click to load, Right-click to delete)"
 ExtraLabel.Font = Enum.Font.GothamBold
 ExtraLabel.TextScaled = true
 ExtraLabel.TextWrapped = true
 
--- Animate Extra Section open/close
+local function refreshExtraSection()
+	for _, child in ipairs(ExtraSection:GetChildren()) do
+		if child:IsA("TextButton") and child ~= ExtraClose then
+			child:Destroy()
+		end
+	end
+	
+	local index = 1
+	for name, code in pairs(savedScripts) do
+		local btn = Instance.new("TextButton")
+		btn.Size = UDim2.new(0.9,0,0,30)
+		btn.Position = UDim2.new(0.05,0,0,30 * index + 25)
+		btn.Text = name
+		btn.Font = Enum.Font.Gotham
+		btn.TextScaled = true
+		btn.TextColor3 = Color3.new(1,1,1)
+		btn.BackgroundTransparency = 0.2
+		btn.BackgroundColor3 = Color3.fromRGB(50,50,50)
+		btn.Parent = ExtraSection
+		
+		btn.MouseEnter:Connect(function()
+			TweenService:Create(btn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(80,80,80)}):Play()
+		end)
+		btn.MouseLeave:Connect(function()
+			TweenService:Create(btn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(50,50,50)}):Play()
+		end)
+		
+		btn.MouseButton1Click:Connect(function()
+			Editor.Text = code
+			closeExtraSection()
+		end)
+		
+		btn.MouseButton2Click:Connect(function()
+			savedScripts[name] = nil
+			refreshExtraSection()
+		end)
+		
+		index = index + 1
+	end
+end
+
+SaveButton.MouseButton1Click:Connect(function()
+	local text = Editor.Text
+	if text ~= "" then
+		local name = text:sub(1,10)
+		local counter = 1
+		local originalName = name
+		while savedScripts[name] do
+			counter = counter + 1
+			name = originalName.."_"..counter
+		end
+		savedScripts[name] = text
+		refreshExtraSection()
+		print("Saved script:", name)
+	end
+end)
+
 local function openExtraSection()
     ExtraSection.Visible = true
     TweenService:Create(ExtraSection, TweenInfo.new(0.4, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
         Position = UDim2.new(0.5, guiWidth/2 + 10, 0.5, -guiHeight/2)
     }):Play()
 end
-
 local function closeExtraSection()
     TweenService:Create(ExtraSection, TweenInfo.new(0.3, Enum.EasingStyle.Quint, Enum.EasingDirection.In), {
         Position = UDim2.new(0.5, guiWidth/2 + 500, 0.5, -guiHeight/2)
@@ -280,27 +362,201 @@ local function closeExtraSection()
     wait(0.3)
     ExtraSection.Visible = false
 end
-
---// Section Button in main GUI
-local SectionButton = Instance.new("TextButton")
-SectionButton.Parent = MainGUI
-SectionButton.Size = UDim2.new(0.9,0,0.1,0)
-SectionButton.Position = UDim2.new(0.05,0,0.9,0)
-SectionButton.BackgroundTransparency = 1
-SectionButton.Text = "Open Extra Section"
-SectionButton.Font = Enum.Font.GothamBold
-SectionButton.TextScaled = true
-SectionButton.TextColor3 = Color3.new(1,1,1)
-SectionButton.TextStrokeTransparency = 0.5
-
--- Hover animation
-SectionButton.MouseEnter:Connect(function()
-    TweenService:Create(SectionButton, TweenInfo.new(0.2), {TextColor3 = Color3.fromRGB(255,182,193)}):Play()
-end)
-SectionButton.MouseLeave:Connect(function()
-    TweenService:Create(SectionButton, TweenInfo.new(0.2), {TextColor3 = Color3.new(1,1,1)}):Play()
-end)
-
--- Connect buttons
-SectionButton.MouseButton1Click:Connect(openExtraSection)
 ExtraClose.MouseButton1Click:Connect(closeExtraSection)
+
+SectionButton.MouseButton1Click:Connect(openExtraSection)
+
+--// Auto-Complete (fixed + navigation)
+local keywords = {
+	"local","function","if","then","end","for","while","repeat","until","return","break","do","else","elseif",
+	"print","warn","wait","game","workspace","Players","CFrame","Vector3","Humanoid","Instance","Enum"
+}
+
+-- AutoFrame (container)
+local AutoFrame = Instance.new("Frame")
+AutoFrame.Parent = MainGUI
+AutoFrame.Size = UDim2.new(0.9,0,0,0) -- height set dynamically
+AutoFrame.Position = UDim2.new(0.05,0,0,0) -- will be updated under editor
+AutoFrame.BackgroundTransparency = 1
+AutoFrame.Visible = false
+AutoFrame.ZIndex = 10
+local autoCorner = Instance.new("UICorner", AutoFrame)
+autoCorner.CornerRadius = UDim.new(0,8)
+
+-- Internal state for suggestions
+local suggestions = {}
+local selectedIndex = 0
+local maxVisible = 6
+local rowHeight = 22
+
+local function getCurrentWord(text)
+	-- get word under / before caret: we'll approximate with trailing word
+	return text:match("[%w_]+$") or ""
+end
+
+local function clearSuggestions()
+	for _, child in ipairs(AutoFrame:GetChildren()) do
+		if child:IsA("TextButton") or child:IsA("TextLabel") then
+			child:Destroy()
+		end
+	end
+	suggestions = {}
+	selectedIndex = 0
+end
+
+local function highlightSelection(index)
+	-- index is 1-based
+	for i, child in ipairs(AutoFrame:GetChildren()) do
+		if child:IsA("TextButton") then
+			if i == index then
+				child.BackgroundTransparency = 0
+				child.BackgroundColor3 = Color3.fromRGB(60,60,60)
+			else
+				child.BackgroundTransparency = 1
+			end
+		end
+	end
+end
+
+local function applySelection(index, word)
+	if index < 1 or index > #suggestions then return end
+	local k = suggestions[index]
+	-- replace current word with k
+	Editor.Text = Editor.Text:sub(1, #Editor.Text - #word) .. k
+	AutoFrame.Visible = false
+	clearSuggestions()
+end
+
+local function updateAutoComplete()
+	local word = getCurrentWord(Editor.Text)
+	if word == "" then
+		AutoFrame.Visible = false
+		clearSuggestions()
+		return
+	end
+
+	-- collect matches
+	local matches = {}
+	for _, k in ipairs(keywords) do
+		if k:sub(1, #word) == word then
+			table.insert(matches, k)
+		end
+	end
+
+	if #matches == 0 then
+		AutoFrame.Visible = false
+		clearSuggestions()
+		return
+	end
+
+	-- set suggestions
+	suggestions = matches
+
+	-- Determine position: place just below the editor (using scale positions)
+	local editorBottomY = Editor.Position.Y.Scale + Editor.Size.Y.Scale
+	-- add tiny padding (0.01)
+	AutoFrame.Position = UDim2.new(0.05, 0, editorBottomY + 0.01, 0)
+
+	-- Height depends on number of visible items
+	local visibleCount = math.min(#suggestions, maxVisible)
+	local totalHeight = visibleCount * rowHeight
+	AutoFrame.Size = UDim2.new(0.9, 0, 0, totalHeight)
+	AutoFrame.Visible = true
+
+	-- Clear old and create new entries
+	clearSuggestions()
+	for i = 1, visibleCount do
+		local k = suggestions[i]
+		local btn = Instance.new("TextButton")
+		btn.Name = "AutoItem_"..i
+		btn.Parent = AutoFrame
+		btn.Size = UDim2.new(1, 0, 0, rowHeight)
+		btn.Position = UDim2.new(0, 0, 0, (i-1) * rowHeight)
+		btn.BackgroundTransparency = 1
+		btn.Text = "  " .. k -- padding left
+		btn.TextXAlignment = Enum.TextXAlignment.Left
+		btn.TextColor3 = Color3.new(1,1,1)
+		btn.Font = Enum.Font.Gotham
+		btn.TextScaled = true
+		btn.ZIndex = 11
+
+		-- Mouse hover highlight
+		btn.MouseEnter:Connect(function()
+			highlightSelection(i)
+			selectedIndex = i
+		end)
+		btn.MouseLeave:Connect(function()
+			-- remove highlight when leaving (unless it's selected)
+			highlightSelection(selectedIndex)
+		end)
+
+		btn.MouseButton1Click:Connect(function()
+			applySelection(i, word)
+		end)
+	end
+
+	-- reset selected index
+	selectedIndex = 1
+	highlightSelection(selectedIndex)
+end
+
+-- Key navigation: Up/Down/Enter/Tab
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+	if gameProcessed then return end
+	if not AutoFrame.Visible then return end
+
+	if input.KeyCode == Enum.KeyCode.Down then
+		if #suggestions > 0 then
+			selectedIndex = math.min(selectedIndex + 1, math.min(#suggestions, maxVisible))
+			highlightSelection(selectedIndex)
+		end
+	elseif input.KeyCode == Enum.KeyCode.Up then
+		if #suggestions > 0 then
+			selectedIndex = math.max(selectedIndex - 1, 1)
+			highlightSelection(selectedIndex)
+		end
+	elseif input.KeyCode == Enum.KeyCode.Return or input.KeyCode == Enum.KeyCode.Enter then
+		if #suggestions > 0 and selectedIndex > 0 then
+			local word = getCurrentWord(Editor.Text)
+			applySelection(selectedIndex, word)
+		end
+	elseif input.KeyCode == Enum.KeyCode.Tab then
+		-- consume tab for autocomplete
+		if #suggestions > 0 and selectedIndex > 0 then
+			local word = getCurrentWord(Editor.Text)
+			applySelection(selectedIndex, word)
+		end
+	end
+end)
+
+-- Update on text change
+Editor:GetPropertyChangedSignal("Text"):Connect(updateAutoComplete)
+
+-- Make sure clicking outside closes autocomplete
+MainGUI.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+		-- If AutoFrame visible and click is outside AutoFrame and Editor, close it
+		local mouse = UserInputService:GetMouseLocation()
+		-- mouse returns Vector2 in screen coordinates; we won't do pixel-perfect check here (roblox specifics vary),
+		-- but simplest approach: hide autocomplete if click is below the editor bottom (i.e., likely on buttons),
+		-- otherwise leave it.
+		local viewportSize = workspace.CurrentCamera and workspace.CurrentCamera.ViewportSize or Vector2.new(800,600)
+		-- compute editor bottom pixel Y:
+		local guiPos = MainGUI.AbsolutePosition
+		local editorAbsPos = Editor.AbsolutePosition
+		local editorAbsSize = Editor.AbsoluteSize
+		if AutoFrame.Visible and (mouse.Y > (editorAbsPos.Y + editorAbsSize.Y + 10)) then
+			AutoFrame.Visible = false
+			clearSuggestions()
+		end
+	end
+end)
+
+-- End of Auto-Complete ------------------------------------------------------
+
+-- Ensure ExtraSection refresh function is accessible above usage
+-- (refreshExtraSection declared earlier, already in script)
+
+-- Final note: ensure the script doesn't error if Editor hasn't calculated AbsolutePosition yet:
+-- If the Editor AbsolutePosition/Size calls are nil on first frame, user interactions will correct behavior.
+
