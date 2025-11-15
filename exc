@@ -1,0 +1,306 @@
+--// Services
+local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
+local CoreGui = game:GetService("CoreGui")
+local HttpService = game:GetService("HttpService")
+
+--// ScreenGui
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "MiahloolExecutor"
+ScreenGui.Parent = CoreGui
+ScreenGui.ResetOnSpawn = false
+
+--// App Icon
+local AppIcon = Instance.new("ImageButton")
+AppIcon.Parent = ScreenGui
+AppIcon.Size = UDim2.new(0, 70, 0, 70)
+AppIcon.Position = UDim2.new(0, 20, 0, 20)
+AppIcon.BackgroundTransparency = 1
+AppIcon.Image = "rbxassetid://15549219453"
+AppIcon.Active = true
+AppIcon.AutoButtonColor = false
+Instance.new("UICorner", AppIcon).CornerRadius = UDim.new(0,16)
+
+-- Draggable App Icon
+local iconDragging, iconDragInput, iconDragStart, iconStartPos
+AppIcon.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+		iconDragging = true
+		iconDragStart = input.Position
+		iconStartPos = AppIcon.Position
+		input.Changed:Connect(function()
+			if input.UserInputState == Enum.UserInputState.End then
+				iconDragging = false
+			end
+		end)
+	end
+end)
+AppIcon.InputChanged:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseMovement then
+		iconDragInput = input
+	end
+end)
+UserInputService.InputChanged:Connect(function(input)
+	if input == iconDragInput and iconDragging then
+		local delta = input.Position - iconDragStart
+		AppIcon.Position = UDim2.new(iconStartPos.X.Scale, iconStartPos.X.Offset + delta.X, iconStartPos.Y.Scale, iconStartPos.Y.Offset + delta.Y)
+	end
+end)
+
+--// Main GUI
+local MainGUI = Instance.new("ImageLabel")
+MainGUI.Parent = ScreenGui
+local guiWidth, guiHeight = 360, 280
+MainGUI.Size = UDim2.new(0, guiWidth, 0, guiHeight)
+MainGUI.Position = UDim2.new(0.5, -guiWidth/2, 0.5, -guiHeight/2)
+MainGUI.Image = "rbxassetid://15037065305"
+MainGUI.BackgroundTransparency = 1
+MainGUI.Visible = false
+MainGUI.ScaleType = Enum.ScaleType.Stretch
+Instance.new("UICorner", MainGUI).CornerRadius = UDim.new(0,16)
+
+-- Shadow for depth
+local Shadow = Instance.new("ImageLabel")
+Shadow.Parent = MainGUI
+Shadow.ZIndex = -1
+Shadow.Size = UDim2.new(1,30,1,30)
+Shadow.Position = UDim2.new(0,-15,0,-15)
+Shadow.Image = "rbxassetid://7157936134"
+Shadow.BackgroundTransparency = 1
+Shadow.ScaleType = Enum.ScaleType.Slice
+Shadow.SliceCenter = Rect.new(10,10,90,90)
+
+-- Discord-style tag
+local Tag = Instance.new("TextLabel")
+Tag.Parent = MainGUI
+Tag.Size = UDim2.new(0.4,0,0,22)
+Tag.Position = UDim2.new(0.05,0,-0.07,0)
+Tag.BackgroundTransparency = 1
+Tag.TextColor3 = Color3.new(1,1,1)
+Tag.Font = Enum.Font.GothamBold
+Tag.TextScaled = true
+Tag.Text = "@miahhii"
+Tag.TextStrokeTransparency = 0.5
+Tag.TextWrapped = true
+
+-- Title Bar
+local TitleBar = Instance.new("TextLabel")
+TitleBar.Parent = MainGUI
+TitleBar.Size = UDim2.new(1,0,0,30)
+TitleBar.BackgroundTransparency = 1
+TitleBar.Text = "Miahlool Executor"
+TitleBar.TextColor3 = Color3.new(1,1,1)
+TitleBar.Font = Enum.Font.GothamBold
+TitleBar.TextScaled = true
+TitleBar.TextStrokeTransparency = 0.5
+
+-- Close Button
+local CloseButton = Instance.new("TextButton")
+CloseButton.Parent = TitleBar
+CloseButton.Size = UDim2.new(0,30,1,0)
+CloseButton.Position = UDim2.new(1,-35,0,0)
+CloseButton.BackgroundTransparency = 1
+CloseButton.Text = "X"
+CloseButton.Font = Enum.Font.GothamBold
+CloseButton.TextScaled = true
+CloseButton.TextColor3 = Color3.new(1,1,1)
+CloseButton.TextStrokeTransparency = 0.5
+
+-- Editor
+local Editor = Instance.new("TextBox")
+Editor.Parent = MainGUI
+Editor.Position = UDim2.new(0.05,0,0.15,0)
+Editor.Size = UDim2.new(0.9,0,0.55,0)
+Editor.BackgroundTransparency = 1
+Editor.TextColor3 = Color3.new(1,1,1)
+Editor.PlaceholderText = "Type your script here or paste a URL..."
+Editor.Font = Enum.Font.Gotham
+Editor.TextSize = 16
+Editor.MultiLine = true
+Editor.TextWrapped = true
+Editor.TextStrokeTransparency = 0.5
+Editor.TextXAlignment = Enum.TextXAlignment.Left
+Editor.TextYAlignment = Enum.TextYAlignment.Top
+
+-- Buttons
+local Execute = Instance.new("TextButton")
+local Clear = Instance.new("TextButton")
+
+Execute.Parent = MainGUI
+Execute.Size = UDim2.new(0.45,0,0.18,0)
+Execute.Position = UDim2.new(0.04,0,0.75,0)
+Execute.BackgroundTransparency = 1
+Execute.Text = "Execute"
+Execute.Font = Enum.Font.GothamBold
+Execute.TextScaled = true
+Execute.TextColor3 = Color3.new(1,1,1)
+Execute.TextStrokeTransparency = 0.5
+
+Clear.Parent = MainGUI
+Clear.Size = UDim2.new(0.45,0,0.18,0)
+Clear.Position = UDim2.new(0.51,0,0.75,0)
+Clear.BackgroundTransparency = 1
+Clear.Text = "Clear"
+Clear.Font = Enum.Font.GothamBold
+Clear.TextScaled = true
+Clear.TextColor3 = Color3.new(1,1,1)
+Clear.TextStrokeTransparency = 0.5
+
+-- Hover animation for buttons
+local function addHoverEffect(button)
+	button.MouseEnter:Connect(function()
+		TweenService:Create(button, TweenInfo.new(0.2), {TextColor3 = Color3.fromRGB(255,182,193)}):Play()
+	end)
+	button.MouseLeave:Connect(function()
+		TweenService:Create(button, TweenInfo.new(0.2), {TextColor3 = Color3.new(1,1,1)}):Play()
+	end)
+end
+addHoverEffect(Execute)
+addHoverEffect(Clear)
+addHoverEffect(CloseButton)
+
+-- Open/Close animations
+local function animateOpen()
+	MainGUI.Visible = true
+	MainGUI.Position = UDim2.new(0.5, -guiWidth/2, -0.5, -guiHeight/2)
+	TweenService:Create(MainGUI, TweenInfo.new(0.4, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+		Position = UDim2.new(0.5, -guiWidth/2, 0.5, -guiHeight/2)
+	}):Play()
+end
+
+local function animateClose()
+	local tween = TweenService:Create(MainGUI, TweenInfo.new(0.3, Enum.EasingStyle.Quint, Enum.EasingDirection.In), {
+		Position = UDim2.new(0.5, -guiWidth/2, -0.5, -guiHeight/2)
+	})
+	tween:Play()
+	tween.Completed:Wait()
+	MainGUI.Visible = false
+end
+
+AppIcon.MouseButton1Click:Connect(function()
+	if MainGUI.Visible then animateClose() else animateOpen() end
+end)
+CloseButton.MouseButton1Click:Connect(animateClose)
+
+-- Execute script safely
+Execute.MouseButton1Click:Connect(function()
+	local code = Editor.Text
+	if code ~= "" then
+		local success, err = pcall(function()
+			if string.match(code, "^https?://") then
+				local response = game:HttpGet(code)
+				loadstring(response)()
+			else
+				loadstring(code)()
+			end
+		end)
+		if not success then
+			warn("Script execution error:", err)
+		end
+	end
+end)
+
+-- Clear editor
+Clear.MouseButton1Click:Connect(function()
+	Editor.Text = ""
+end)
+
+-- Dragging GUI
+local dragging, dragInput, dragStart, startPos
+MainGUI.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+		dragging = true
+		dragStart = input.Position
+		startPos = MainGUI.Position
+		input.Changed:Connect(function()
+			if input.UserInputState == Enum.UserInputState.End then dragging = false end
+		end)
+	end
+end)
+MainGUI.InputChanged:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseMovement then
+		dragInput = input
+	end
+end)
+UserInputService.InputChanged:Connect(function(input)
+	if input == dragInput and dragging then
+		local delta = input.Position - dragStart
+		MainGUI.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+	end
+end)
+
+--// Extra Section GUI
+local ExtraSection = Instance.new("ImageLabel")
+ExtraSection.Parent = ScreenGui
+ExtraSection.Size = UDim2.new(0, 300, 0, 280)
+ExtraSection.Position = UDim2.new(0.5, guiWidth/2 + 20, 0.5, -guiHeight/2)
+ExtraSection.Image = "rbxassetid://15037065305"
+ExtraSection.BackgroundTransparency = 1
+ExtraSection.Visible = false
+ExtraSection.ScaleType = Enum.ScaleType.Stretch
+Instance.new("UICorner", ExtraSection).CornerRadius = UDim.new(0,16)
+
+-- Close button inside Extra Section
+local ExtraClose = Instance.new("TextButton")
+ExtraClose.Parent = ExtraSection
+ExtraClose.Size = UDim2.new(0,30,0,30)
+ExtraClose.Position = UDim2.new(1,-35,0,5)
+ExtraClose.BackgroundTransparency = 1
+ExtraClose.Text = "X"
+ExtraClose.Font = Enum.Font.GothamBold
+ExtraClose.TextScaled = true
+ExtraClose.TextColor3 = Color3.new(1,1,1)
+ExtraClose.TextStrokeTransparency = 0.5
+
+-- Example content in Extra Section
+local ExtraLabel = Instance.new("TextLabel")
+ExtraLabel.Parent = ExtraSection
+ExtraLabel.Size = UDim2.new(0.9,0,0.8,0)
+ExtraLabel.Position = UDim2.new(0.05,0,0.1,0)
+ExtraLabel.BackgroundTransparency = 1
+ExtraLabel.TextColor3 = Color3.new(1,1,1)
+ExtraLabel.TextStrokeTransparency = 0.5
+ExtraLabel.Text = "This is the Extra Section!"
+ExtraLabel.Font = Enum.Font.GothamBold
+ExtraLabel.TextScaled = true
+ExtraLabel.TextWrapped = true
+
+-- Animate Extra Section open/close
+local function openExtraSection()
+    ExtraSection.Visible = true
+    TweenService:Create(ExtraSection, TweenInfo.new(0.4, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+        Position = UDim2.new(0.5, guiWidth/2 + 10, 0.5, -guiHeight/2)
+    }):Play()
+end
+
+local function closeExtraSection()
+    TweenService:Create(ExtraSection, TweenInfo.new(0.3, Enum.EasingStyle.Quint, Enum.EasingDirection.In), {
+        Position = UDim2.new(0.5, guiWidth/2 + 500, 0.5, -guiHeight/2)
+    }):Play()
+    wait(0.3)
+    ExtraSection.Visible = false
+end
+
+--// Section Button in main GUI
+local SectionButton = Instance.new("TextButton")
+SectionButton.Parent = MainGUI
+SectionButton.Size = UDim2.new(0.9,0,0.1,0)
+SectionButton.Position = UDim2.new(0.05,0,0.9,0)
+SectionButton.BackgroundTransparency = 1
+SectionButton.Text = "Open Extra Section"
+SectionButton.Font = Enum.Font.GothamBold
+SectionButton.TextScaled = true
+SectionButton.TextColor3 = Color3.new(1,1,1)
+SectionButton.TextStrokeTransparency = 0.5
+
+-- Hover animation
+SectionButton.MouseEnter:Connect(function()
+    TweenService:Create(SectionButton, TweenInfo.new(0.2), {TextColor3 = Color3.fromRGB(255,182,193)}):Play()
+end)
+SectionButton.MouseLeave:Connect(function()
+    TweenService:Create(SectionButton, TweenInfo.new(0.2), {TextColor3 = Color3.new(1,1,1)}):Play()
+end)
+
+-- Connect buttons
+SectionButton.MouseButton1Click:Connect(openExtraSection)
+ExtraClose.MouseButton1Click:Connect(closeExtraSection)
